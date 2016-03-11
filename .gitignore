@@ -1,0 +1,14 @@
+dist
+log/*
+*~
+**/#*#
+.DS_Store
+.cabal-sandbox
+.cabal-sandbox.disabled
+/cabal.sandbox.config
+/TAGS
+*/result
+/result
+**/*.js_hi
+**/*.js_o
+**/*.jsexe
