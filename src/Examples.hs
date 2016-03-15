@@ -28,4 +28,7 @@ import Core
 
 fac :: Expr
 fac = undefined
+-- fac = Abs
+--     where
+--       n = Var 1 (Ty...)
 

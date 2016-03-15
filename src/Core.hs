@@ -50,9 +50,10 @@ data ExprF f =
  deriving (Eq, Ord, Show, Functor, Foldable, Traversable)
 
 data TypeF f =
-   TVar TyVar
- | TApp f f
- | TAbs TyVar f
+   TVar    TyVar
+ | TApp    f f
+ | TAbs    TyVar f -- Type-lambda (System Fw)
+ | TForAll TyVar f -- Polymorphic types (System F)
 
  | TLet TyVar f f
  | TLetRec [(TyVar,f)] f
