@@ -6,7 +6,8 @@ module Core(
   Var(..),
   TyVar(..),
   Literal(..),
-  AltCon(..)
+  AltCon(..),
+  DataCon(..)
 )
 where
 
@@ -42,7 +43,7 @@ data ExprF f =
 
  | Lit      Literal
  | Prim     PrimOp   -- In GHC primops are represented as variables
- | InjectDataCon Int -- In GHC data ctrs are represented as variables
+ | Inject   DataCon  -- In GHC data ctrs are represented as variables
                      -- (ie as 'Var Id' but tagged with appropriate 'IdDetails'...)
                      -- we prefer to represent them explicitly .... Q. Is that sensible??
 
@@ -62,9 +63,9 @@ type Expr = Fix ExprF
 type Type = Fix TypeF
 type Bind = Var
 
-data AltCon = AltCon Int -- Int is the index of the data ctr being matched
-            | DEFAULT
-              deriving (Eq, Ord, Show)
+data AltCon  = AltCon DataCon | DEFAULT deriving (Eq, Ord, Show)
+data DataCon = DataCon { dcTag :: Int } -- Int is the index of the data ctr being matched
+ deriving (Eq, Ord, Show)
 
 data Literal = LitInt Int
              | LitBool Bool
