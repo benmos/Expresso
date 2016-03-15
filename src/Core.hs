@@ -37,7 +37,7 @@ data ExprF f =
 
  | Case   f [(AltCon,[Bind],f)] -- NB. Case must be 'exhaustive' (which may be achieved by using 'DEFAULT')
                                 -- Q. How to handle literals?
-                                -- A. As 'guards' (c.f. SPLJ / Wadler Ch.4, p.58)
+                                -- A. As 'guards' (c.f. SLPJ / Wadler Ch.4, p.58)
                                 -- Guards are themselves compiled as 'IF' which is
                                 -- itself compiled as 'case <bool> of True -> ... | False -> ...'
 
