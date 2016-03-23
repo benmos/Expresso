@@ -30,11 +30,10 @@ import Utils
 --
 
 fac :: Expr
-fac = Fix $ LetRec [(varfac, Fix $ Abs varn cs)] res
+fac = Fix $ LetRec [(varfac, Fix $ Abs TInt varn cs)] res
     where
-      tfac    = Fix $ TFunTy TInt TInt
-      varfac  = V 1 tfac
-      varn    = V 0 TInt
+      varfac  = V 1
+      varn    = V 0
       facexpr = Fix $ Var varfac
       n       = Fix $ Var varn
 
@@ -43,6 +42,6 @@ fac = Fix $ LetRec [(varfac, Fix $ Abs varn cs)] res
                         (AltCon TrueCon,[],LInt 1),
                         (AltCon FalseCon,[],binFun PrimMulInt n rece)
                       ]
-      rece    = Fix $ App (Fix $ Var $ V 1 tfac) (binFun PrimSubInt n (LInt 1))
+      rece    = Fix $ App (Fix $ Var $ V 1) (binFun PrimSubInt n (LInt 1))
       res     = Fix $ App facexpr (LInt 5)
 

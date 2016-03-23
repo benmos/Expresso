@@ -1,5 +1,8 @@
 {-# LANGUAGE FlexibleContexts, DeriveFunctor, DeriveFoldable, DeriveTraversable, PatternSynonyms #-}
 module Core(
+  TypeEnv, -- ^ Kept abstract
+  lookupTypeEnv,
+
   Expr,
   ExprF(..),
   Var(..),
@@ -26,19 +29,24 @@ import Prim
 import Type
 import Utils
 
-import qualified Data.Text as T
+import qualified Data.IntMap as IM
+import qualified Data.Text   as T
 
-data Var = V { varId :: Int,
-               varType :: Type
-             }
-          deriving (Eq, Ord, Show)
+-- c.f. 'TyVar' in Type.hs
+newtype Var = V { varId :: Int } deriving (Eq, Ord, Show)
+
+newtype TypeEnv = TypeEnv { unTypeEnv :: IM.IntMap Type } deriving (Eq, Show) -- Var   -> Type
+
+lookupTypeEnv :: TypeEnv -> Var -> Maybe Type
+lookupTypeEnv te v = IM.lookup (varId v) (unTypeEnv te)
+
 
 data ExprF f =
    Var      Var
- | App         f f
- | Abs      Bind f
- | TyApp       f f
- | TyAbs    Bind f
+ | App              f f
+ | Abs      Type Bind f
+ | TyApp            f f
+ | TyAbs    Kind Bind f
 
  | Let      Bind f   f
  | LetRec [(Bind,f)] f -- (Mutually-)Recursive bindings

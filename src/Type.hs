@@ -1,5 +1,9 @@
 {-# LANGUAGE DeriveFunctor, DeriveFoldable, DeriveTraversable, PatternSynonyms #-}
 module Type(
+  KindEnv, -- ^ Kept abstract
+  lookupKindEnv,
+
+  Kind,
   Type,
   TypeF(..),
   TyCon(..),
@@ -20,12 +24,18 @@ where
 
 import Utils
 
-import qualified Data.Text as T
+import qualified Data.IntMap as IM
+import qualified Data.Text   as T
 
-data TyVar = TV { tvarId :: Int
-             }
-          deriving (Eq, Ord, Show)
+-- c.f. 'Var' in Core.hs
+newtype TyVar = TV { tvarId :: Int} deriving (Eq, Ord, Show)
 
+newtype KindEnv = KindEnv { unKindEnv :: IM.IntMap Kind } deriving (Eq, Show) -- TyVar -> Kind
+
+lookupKindEnv :: KindEnv -> TyVar -> Maybe Kind
+lookupKindEnv te tv = IM.lookup (tvarId tv) (unKindEnv te)
+
+type Kind = () -- NYI
 type Type = Fix TypeF
 
 data TypeF f =
