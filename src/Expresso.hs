@@ -2,7 +2,6 @@ module Main
 
 where
 
-import Core(Expr)
 import Examples
 
 main :: IO ()
