@@ -30,13 +30,14 @@ import Utils
 --
 
 fac :: Expr
-fac = Fix $ Abs varn cs
+fac = -- TODO: This should use 'LetRec' ...
+  Fix $ Abs varn cs
     where
       varn    = V 0 TInt
       n       = Fix $ Var varn
       eqi x y = Fix $ Prim2 PrimEqInt x y
       cs      = Fix $ Case (eqi n (LInt 0)) [(AltCon TrueCon,[],LInt 1), (AltCon FalseCon,[],binFun PrimMulInt n rece)]
       dec     = binFun PrimSubInt n (LInt 1)
-      rece    = Fix $ App (Fix $ Var $ V 1 tfac) dec -- assumes v1 is (the recursively bound) 'fac'
+      rece    = Fix $ App (Fix $ Var $ V 1 tfac) dec -- assumes v1 is (the recursively bound) 'fac' ... FIXME. See TODO.
       tfac    = Fix $ TFunTy TInt TInt
 
