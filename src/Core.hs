@@ -43,10 +43,10 @@ lookupTypeEnv te v = IM.lookup (varId v) (unTypeEnv te)
 
 data ExprF f =
    Var      Var
- | App              f f
- | Abs      Type Bind f
- | TyApp            f f
- | TyAbs    Kind Bind f
+ | App                  f f
+ | Abs      Type Bind   f
+ | TyApp                f f
+ | TyAbs    Kind TyBind f
 
  | Let      Bind f   f
  | LetRec [(Bind,f)] f -- (Mutually-)Recursive bindings
@@ -67,8 +67,9 @@ data ExprF f =
 
  deriving (Eq, Ord, Show, Functor, Foldable, Traversable)
 
-type Expr = Fix ExprF
-type Bind = Var
+type Expr   = Fix ExprF
+type Bind   = Var
+type TyBind = TyVar
 
 data AltCon  = AltCon DataCon | DEFAULT deriving (Eq, Ord, Show)
 data DataCon = DataCon { dcTag :: Int } -- Int is the index of the data ctr being matched
