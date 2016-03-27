@@ -2,6 +2,7 @@
 module Type(
   KindEnv, -- ^ Kept abstract
   lookupKindEnv,
+  extendKindEnv,
 
   Kind,
   Type,
@@ -33,7 +34,10 @@ newtype TyVar = TV { tvarId :: Int} deriving (Eq, Ord, Show)
 newtype KindEnv = KindEnv { unKindEnv :: IM.IntMap Kind } deriving (Eq, Show) -- TyVar -> Kind
 
 lookupKindEnv :: KindEnv -> TyVar -> Maybe Kind
-lookupKindEnv te tv = IM.lookup (tvarId tv) (unKindEnv te)
+lookupKindEnv ke tv = IM.lookup (tvarId tv) (unKindEnv ke)
+
+extendKindEnv :: KindEnv -> TyVar -> Kind -> KindEnv
+extendKindEnv ke v k = KindEnv $ IM.insert (tvarId v) k $ unKindEnv ke
 
 type Kind = () -- NYI
 type Type = Fix TypeF
@@ -53,12 +57,12 @@ data TypeF f =
                    -- [https://github.com/ghc/ghc/blob/6e56ac58a6905197412d58e32792a04a63b94d7e/compiler/types/TypeRep.hs]
                    -- Before: [https://github.com/ghc/ghc/tree/6e56ac58a6905197412d58e32792a04a63b94d7e/compiler/types]
                    -- After:  [https://github.com/ghc/ghc/tree/6746549772c5cc0ac66c0fce562f297f4d4b80a2/compiler/types]
- | TForAll TyVar f -- Polymorphic types (System F)
- --  | TAbs    TyVar f -- Type-lambda (System Fw)
+ | TForAll Kind TyVar f -- Polymorphic types (System F)
+--  | TAbs Kind TyVar f -- Type-lambda (System Fw)
 
  | TCon TyCon
  | TTuple [f]
- | TLet TyVar f f
+ | TLet      TyVar f   f
  | TLetRec [(TyVar,f)] f
 
  deriving (Eq, Ord, Show, Functor, Foldable, Traversable)
