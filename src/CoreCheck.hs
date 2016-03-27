@@ -5,7 +5,7 @@ module CoreCheck(
 where
 
 import Core
--- import Prim
+import Prim
 import Type
 import Utils
 
@@ -22,15 +22,7 @@ coreCheck kenv tenv = go . unFix
     go (Var v  ) = maybe (throwError ("No type for variable: " <> tshow v)) return $ lookupTypeEnv tenv v
     go (App f x') = do
                    tf  <- go (unFix f)
-                   tx' <- go (unFix x')
-                   case unFix tf of
-                     TFunTy tx tres -> do
-                                       unless (tx == tx') $
-                                              throwError $ "Attempt to apply fn expecting " <> tshow tx
-                                                             <> " to " <> tshow tx'
-                                       return tres
-                     _              -> throwError ("Attempt to apply a non-function: " <> tshow f <> " :: " <> tshow tf)
-                   
+                   coreCheckApp kenv tenv tf x'
     go (Abs tx x b) = coreCheck kenv (extendTypeEnv tenv x tx) b
     go (TyApp f t) = do
                    tf <- go       (unFix f)
@@ -42,7 +34,26 @@ coreCheck kenv tenv = go . unFix
                                                              <> " to " <> tshow k'
                                        return $ tsubst tv t tres
                      _              -> throwError ("Attempt to type-apply a non-typeabs: " <> tshow f <> " :: " <> tshow tf)
-    go (TyAbs k tb b) = coreCheck (extendKindEnv kenv tb k) tenv b
+    go (TyAbs k tb b)  = coreCheck (extendKindEnv kenv tb k) tenv b
+
+
+
+
+    go (Lit l)         = return $ typeLit l
+    go (Prim1 p x')    = coreCheckApp kenv tenv (primTy1 p) x'
+    go (Prim2 p x' y') = coreCheckApp kenv tenv (primTy2 p) (Fix $ Tuple [x', y'])
+    go (Tuple ts)      = Fix . TTuple <$> mapM (coreCheck kenv tenv) ts
+
+
+coreCheckApp :: KindEnv -> TypeEnv -> Type -> Expr -> Except T.Text Type
+coreCheckApp kenv tenv (Fix (TFunTy tx tres)) x' = do
+                                       tx' <- coreCheck kenv tenv x'
+                                       unless (tx == tx') $
+                                              throwError $ "Attempt to apply fn expecting " <> tshow tx
+                                                             <> " to " <> tshow tx'
+                                       return tres
+coreCheckApp _    _    tf _ = throwError ("Attempt to apply a non-function :: " <> tshow tf)
+
 
 -- TODO
 typeKind :: KindEnv -> Type -> Except T.Text Kind

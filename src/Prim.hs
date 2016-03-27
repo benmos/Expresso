@@ -1,6 +1,7 @@
 module Prim(
   Prim1(..),
   Prim2(..),
+  primTy1,
   primTy2
 )
 where
@@ -31,6 +32,15 @@ data Prim2 = PrimEqInt
            | PrimDivFloat
            | PrimModInt
   deriving (Eq, Ord, Show)
+
+primTy1 :: Prim1 -> Type
+primTy1 (PrimProject _) = error "primTy1 - TODO - need to add type for polymorphism"
+primTy1 PrimNot         = unaryFun TBool  TBool
+primTy1 PrimNegateInt   = unaryFun TInt   TInt
+primTy1 PrimNegateFloat = unaryFun TFloat TFloat
+primTy1 PrimAbsInt      = unaryFun TInt   TInt
+primTy1 PrimAbsFloat    = unaryFun TFloat TFloat
+
 
 primTy2 :: Prim2 -> Type
 primTy2 PrimEqInt    = binFunTy TInt    TInt    TBool

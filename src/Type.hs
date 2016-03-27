@@ -19,7 +19,8 @@ module Type(
   pattern TString,
 
   -- * Functions
-  binFunTy
+  binFunTy,
+  unaryFun
 )
 where
 
@@ -92,8 +93,12 @@ pattern TBool   = Fix (TCon (PrimTyCon PTBool))
 pattern TChar   = Fix (TCon (PrimTyCon PTChar))
 pattern TString = Fix (TCon (PrimTyCon PTString))
 
--- | binFun t1 t2 t3 = (t1,t2) -> t3
+-- | binFunTy t1 t2 t3 = (t1,t2) -> t3
 --   NB - Tupled not curried
 binFunTy :: Type -> Type -> Type -> Type
 binFunTy t1 t2 t3 = Fix $ TFunTy (Fix $ TTuple [t1, t2]) t3
+
+-- | unaryFun t1 t2 = t1 -> t2
+unaryFun :: Type -> Type -> Type
+unaryFun t1 t2 = Fix $ TFunTy t1 t2
 

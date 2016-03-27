@@ -11,6 +11,8 @@ module Core(
   AltCon(..),
   DataCon(..),
 
+  typeLit,
+
   -- * Pattern Synonyms
   pattern LInt,
   pattern LFloat,
@@ -84,6 +86,12 @@ data Literal = LitInt    Int
              | LitString T.Text
              --  | LitBool   Bool -- No literal booleans, we use 'TrueCon', 'FalseCon' instead
   deriving (Eq, Ord, Show)
+
+typeLit :: Literal -> Type
+typeLit (LitInt    _) = TInt
+typeLit (LitFloat  _) = TFloat
+typeLit (LitChar   _) = TChar
+typeLit (LitString _) = TString
 
 -- pattern LInt n <- Fix (Lit (LitInt n)) where
 --         LInt n  = Fix (Lit (LitInt n))
