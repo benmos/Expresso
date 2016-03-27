@@ -65,6 +65,7 @@ typeKind _ _ = return ()
 --
 --   ... substitutes all occurences of 'tv' for 't2' in 't'.
 tsubst :: TyVar -> Type -> Type -> Type
+tsubst _ _ _ = error "TODO Review and Fixup 'tsubst' - It's at least broken when eg substituting something which has 'X' free under a binder which binds 'X' - it'll get accidentally captured ... so we need to do some alpha renaming or something (eg ensure global uniqueness of vars or whatever)."
 tsubst tv t2 t@(Fix (TVar tv'))         | tv == tv' = t2
                                         | otherwise = t
 tsubst tv t2   (Fix (TApp   t3 t4))                 = Fix $ TApp    (tsubst tv t2 t3) (tsubst tv t2 t4)
