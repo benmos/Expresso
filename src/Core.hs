@@ -2,6 +2,7 @@
 module Core(
   TypeEnv, -- ^ Kept abstract
   lookupTypeEnv,
+  extendTypeEnv,
 
   Expr,
   ExprF(..),
@@ -40,12 +41,14 @@ newtype TypeEnv = TypeEnv { unTypeEnv :: IM.IntMap Type } deriving (Eq, Show) --
 lookupTypeEnv :: TypeEnv -> Var -> Maybe Type
 lookupTypeEnv te v = IM.lookup (varId v) (unTypeEnv te)
 
+extendTypeEnv :: TypeEnv -> Var -> Type -> TypeEnv
+extendTypeEnv te v t = TypeEnv $ IM.insert (varId v) t $ unTypeEnv te
 
 data ExprF f =
    Var      Var
  | App                  f f
  | Abs      Type Bind   f
- | TyApp                f f
+ | TyApp                f Type
  | TyAbs    Kind TyBind f
 
  | Let      Bind f   f
