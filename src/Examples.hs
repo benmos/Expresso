@@ -42,6 +42,5 @@ fac = Fix $ LetRec [(varfac, Fix $ Abs TInt varn cs)] res
                         (AltCon TrueCon,[],LInt 1),
                         (AltCon FalseCon,[],binFun PrimMulInt n rece)
                       ]
-      rece    = Fix $ App (Fix $ Var $ V 1) (binFun PrimSubInt n (LInt 1))
+      rece    = Fix $ App (Fix $ Var varfac) (binFun PrimSubInt n (LInt 1))
       res     = Fix $ App facexpr (LInt 5)
-
