@@ -1,6 +1,6 @@
 { mkDerivation, stdenv,
   ghcjs-dom,
-  aeson, array, errors, mtl, text, time, transformers
+  aeson, array, errors, mtl, text, time, transformers, wl-pprint-text
 }:
 
 mkDerivation (
@@ -30,7 +30,7 @@ in {
   buildDepends = [
     # Others
     ghcjs-dom
-    aeson array errors mtl text time transformers
+    aeson array errors mtl text time transformers wl-pprint-text
   ];
 
   isLibrary = false;

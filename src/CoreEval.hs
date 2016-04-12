@@ -33,9 +33,9 @@ eval e = (cata alg e) IM.empty
     alg :: ExprF (Env -> Value) -> Env -> Value
     alg (Var v)        env = lookupValue env v
     alg (App f x)      env = evalApp (f env) (x env)
-    alg (TyApp f x)    env = undefined -- evalApp (f env) (x env)
+    alg (TyApp _f _x)  _env= error "eval TyApp NYI" -- evalApp (f env) (x env)
     alg (Abs _ b e1)   env = mkAbs $ \x -> e1 $ bind env b x
-    alg (TyAbs _ b e1) env = undefined -- mkAbs $ \t -> e1 $ bind env b t
+    alg (TyAbs _ _b _e1) _env = error "eval TyAbs NYI" -- mkAbs $ \t -> e1 $ bind env b t
     alg (Let b e1 e2)  env = e2 $ bind env b (e1 env)
     alg (LetRec bs e2) env =
       e2 $ fix $ \env' ->

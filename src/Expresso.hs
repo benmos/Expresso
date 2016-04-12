@@ -4,10 +4,10 @@ where
 
 import Examples
 import CoreEval
-import Core
-import Type
-import Prim
-import Utils
+-- import Core
+-- import Type
+-- import Prim
+-- import Utils
 
 main :: IO ()
 main = do
