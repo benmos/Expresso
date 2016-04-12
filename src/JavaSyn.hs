@@ -3,7 +3,18 @@ A Java-compatible intermediate language - minimise use of statements
 
 -}
 
-module JavaSyn where
+module JavaSyn(
+  JCompilationUnit(..),
+  JDecl(..),
+  JParam(..),
+  JModifier(..),
+  JType(..),
+  JPrimType(..),
+  JLiteral(..),
+  JStatement(..),
+  JExpr(..)
+)
+where
 
 import           Data.Maybe
 import           Text.PrettyPrint.Leijen

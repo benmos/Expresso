@@ -2,7 +2,11 @@
 --
 -- A call-by-value partial evaluator for Core
 --
-module CoreEval where
+module CoreEval(
+  eval,
+  extract
+)
+where
 
 import Core
 import Prim
