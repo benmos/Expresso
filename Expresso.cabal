@@ -35,7 +35,9 @@ Executable Expresso
     mtl                       >= 2       && < 3,
     text                      >= 0.11,
     time                      >= 1.5,
-    transformers              >= 0.3
+    transformers              >= 0.3,
+
+    wl-pprint-text            >= 1.1
 
   ghc-options: -threaded -rtsopts -Wall -fwarn-tabs -funbox-strict-fields
                    -fno-warn-orphans -fno-warn-unused-do-bind
