@@ -9,13 +9,13 @@ where
 import Type
 -- import Utils
 
-data Prim1 = PrimProject Int
-           | PrimNot
+data Prim1 = -- PrimProject Int
+           {- | -} PrimNot
            | PrimNegateInt
            | PrimNegateFloat
            | PrimAbsInt
            | PrimAbsFloat
-  deriving (Eq, Ord, Show)
+  deriving (Eq, Ord, Show, Bounded, Enum)
 
 data Prim2 = PrimEqInt
            | PrimEqFloat
@@ -31,10 +31,10 @@ data Prim2 = PrimEqInt
            | PrimDivInt
            | PrimDivFloat
            | PrimModInt
-  deriving (Eq, Ord, Show)
+  deriving (Eq, Ord, Show, Bounded, Enum)
 
 primTy1 :: Prim1 -> Type
-primTy1 (PrimProject _) = error "primTy1 - TODO - need to add type for polymorphism"
+-- primTy1 (PrimProject _) = error "primTy1 - TODO - need to add type for polymorphism"
 primTy1 PrimNot         = unaryFun TBool  TBool
 primTy1 PrimNegateInt   = unaryFun TInt   TInt
 primTy1 PrimNegateFloat = unaryFun TFloat TFloat

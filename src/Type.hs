@@ -1,8 +1,12 @@
 {-# LANGUAGE DeriveFunctor, DeriveFoldable, DeriveTraversable, PatternSynonyms #-}
 module Type(
-  KindEnv, -- ^ Kept abstract
+  -- KindEnv, -- ^ Kept abstract
+  KindEnv(..), -- Exposing for now so we can build 'primKindEnv'
   lookupKindEnv,
   extendKindEnv,
+  emptyKindEnv,
+
+  kindStar,
 
   Kind,
   Type,
@@ -30,7 +34,7 @@ import qualified Data.IntMap as IM
 import qualified Data.Text   as T
 
 -- c.f. 'Var' in Core.hs
-newtype TyVar = TV { tvarId :: Int} deriving (Eq, Ord, Show)
+newtype TyVar = TV { tvarId :: Int } deriving (Eq, Ord, Show)
 
 newtype KindEnv = KindEnv { unKindEnv :: IM.IntMap Kind } deriving (Eq, Show) -- TyVar -> Kind
 
@@ -40,8 +44,14 @@ lookupKindEnv ke tv = IM.lookup (tvarId tv) (unKindEnv ke)
 extendKindEnv :: KindEnv -> TyVar -> Kind -> KindEnv
 extendKindEnv ke v k = KindEnv $ IM.insert (tvarId v) k $ unKindEnv ke
 
+emptyKindEnv :: KindEnv
+emptyKindEnv = KindEnv IM.empty
+
 type Kind = () -- NYI
 type Type = Fix TypeF
+
+kindStar :: Kind
+kindStar = () -- TODO
 
 -- Greg Morrisett would probably call this 'ConstructorF', because not all constructors are types (ie of Kind *)
 -- TODO: Rename ConstructorF

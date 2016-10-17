@@ -43,6 +43,10 @@ coreCheck kenv tenv = go . unFix
     go (Prim1 p x')    = coreCheckApp kenv tenv (primTy1 p) x'
     go (Prim2 p x' y') = coreCheckApp kenv tenv (primTy2 p) (Fix $ Tuple [x', y'])
     go (Tuple ts)      = Fix . TTuple <$> mapM (coreCheck kenv tenv) ts
+    go (Inject _dc)     = error "coreCheck - Inject NYI"
+    go (Case _e _alts)   = error "coreCheck - Inject Case"
+    go (Let _b _rhs _bdy) = error "coreCheck - Inject Let"
+    go (LetRec _bs _bdy) = error "coreCheck - Inject LetRec"
 
 
 coreCheckApp :: KindEnv -> TypeEnv -> Type -> Expr -> Except T.Text Type
@@ -65,7 +69,7 @@ typeKind _ _ = return ()
 --
 --   ... substitutes all occurences of 'tv' for 't2' in 't'.
 tsubst :: TyVar -> Type -> Type -> Type
-tsubst _ _ _ = error "TODO Review and Fixup 'tsubst' - It's at least broken when eg substituting something which has 'X' free under a binder which binds 'X' - it'll get accidentally captured ... so we need to do some alpha renaming or something (eg ensure global uniqueness of vars or whatever)."
+tsubst _ _ _ = error "TODO Review and Fixup 'tsubst' - It's at least broken when eg substituting something which has 'X' free under a binder which binds 'X' - it'll get accidentally captured ... so we need to do some alpha renaming or something (eg ensure global uniqueness of vars or whatever).... or maybe we should simply avoid subst altogether and just environments? ala GHC?"
 tsubst tv t2 t@(Fix (TVar tv'))         | tv == tv' = t2
                                         | otherwise = t
 tsubst tv t2   (Fix (TApp   t3 t4))                 = Fix $ TApp    (tsubst tv t2 t3) (tsubst tv t2 t4)

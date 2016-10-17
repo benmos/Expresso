@@ -3,6 +3,10 @@ module Core(
   TypeEnv, -- ^ Kept abstract
   lookupTypeEnv,
   extendTypeEnv,
+  emptyTypeEnv,
+
+  primKindEnv,
+  primTypeEnv,
 
   Expr,
   ExprF(..),
@@ -40,11 +44,37 @@ newtype Var = V { varId :: Int } deriving (Eq, Ord, Show)
 
 newtype TypeEnv = TypeEnv { unTypeEnv :: IM.IntMap Type } deriving (Eq, Show) -- Var   -> Type
 
+emptyTypeEnv :: TypeEnv
+emptyTypeEnv = TypeEnv IM.empty
+
 lookupTypeEnv :: TypeEnv -> Var -> Maybe Type
 lookupTypeEnv te v = IM.lookup (varId v) (unTypeEnv te)
 
 extendTypeEnv :: TypeEnv -> Var -> Type -> TypeEnv
 extendTypeEnv te v t = TypeEnv $ IM.insert (varId v) t $ unTypeEnv te
+
+unionTypeEnv :: TypeEnv -> TypeEnv -> TypeEnv
+unionTypeEnv (TypeEnv t1) (TypeEnv t2) = TypeEnv (IM.union t1 t2)
+
+primTypeEnv :: TypeEnv
+primTypeEnv = -- foldr (\(var,t) te -> extendTypeEnv te var t) emptyTypeEnv [minBound .. maxBound]
+              -- ++
+              -- foldr (\(var,t) te -> extendTypeEnv te var t) emptyTypeEnv [minBound .. maxBound]
+              -- FIXME !!!!!!!!!!!
+              -- FIXME: Starting at 1000 is hideous hack. Work out how to assign these sensibly...
+              -- FIXME !!!!!!!!!!!
+              foldr (\np te -> uncurry (extendTypeEnv te) $ p1 np) emptyTypeEnv (zip [1000..] [minBound .. maxBound])
+              `unionTypeEnv`
+              foldr (\np te -> uncurry (extendTypeEnv te) $ p2 np) emptyTypeEnv (zip [2000..] [minBound .. maxBound])
+    where
+      p1 :: (Int,Prim1) -> (Var, Type)
+      p1 (n, p) = (V n, primTy1 p)
+
+      p2 :: (Int,Prim2) -> (Var, Type)
+      p2 (n, p) = (V n, primTy2 p)
+
+primKindEnv :: KindEnv
+primKindEnv = KindEnv $ IM.map (const kindStar) $ unTypeEnv primTypeEnv
 
 data ExprF f =
    Var      Var                -- (STLC)
