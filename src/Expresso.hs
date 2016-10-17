@@ -11,5 +11,5 @@ main :: IO ()
 main = do
   putStrLn "Hi"
   print fac
-  -- print $ coreCheck primKindEnv primTypeEnv fac -- TODO: Implement 'coreCheck' then uncomment this
+  -- print $ coreCheck emptyKindContext primTypeEnv fac -- TODO: Implement 'coreCheck' then uncomment this
   putStrLn $ show $ extract $ eval fac

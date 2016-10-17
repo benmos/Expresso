@@ -16,17 +16,17 @@ import qualified Data.Text as T
 
 -- | Returns 'Right' if type-correct.
 -- should this take a 'DeclEnv' too (containing data type decls?)
-coreCheck :: KindEnv -> TypeEnv -> Expr -> Except T.Text Type
-coreCheck kenv tenv = go . unFix
+coreCheck :: TyVarContext -> VarContext -> Expr -> Except T.Text Type
+coreCheck tvctx ctx = go . unFix
   where
-    go (Var v  ) = maybe (throwError ("No type for variable: " <> tshow v)) return $ lookupTypeEnv tenv v
+    go (Var v  ) = maybe (throwError ("No type for variable: " <> tshow v)) return $ lookupVarContext ctx v
     go (App f x') = do
                    tf  <- go (unFix f)
-                   coreCheckApp kenv tenv tf x'
-    go (Abs tx x b) = coreCheck kenv (extendTypeEnv tenv x tx) b
-    go (TyApp f t) = do
+                   coreCheckApp tvctx ctx tf x'
+    go (Abs tx x b) = coreCheck tvctx (extendVarContext ctx x tx) b
+    go (TyApp f t) = do -- (System-F) Type Application
                    tf <- go       (unFix f)
-                   k' <- typeKind kenv t
+                   k' <- typeKind tvctx t
                    case unFix tf of
                      TForAll k tv tres -> do
                                        unless (k == k') $
@@ -34,24 +34,24 @@ coreCheck kenv tenv = go . unFix
                                                              <> " to " <> tshow k'
                                        return $ tsubst tv t tres
                      _              -> throwError ("Attempt to type-apply a non-typeabs: " <> tshow f <> " :: " <> tshow tf)
-    go (TyAbs k tb b)  = coreCheck (extendKindEnv kenv tb k) tenv b
+    go (TyAbs k tb b)  = coreCheck (extendTyVarContext tvctx tb k) ctx b
 
 
 
 
     go (Lit l)         = return $ typeLit l
-    go (Prim1 p x')    = coreCheckApp kenv tenv (primTy1 p) x'
-    go (Prim2 p x' y') = coreCheckApp kenv tenv (primTy2 p) (Fix $ Tuple [x', y'])
-    go (Tuple ts)      = Fix . TTuple <$> mapM (coreCheck kenv tenv) ts
+    go (Prim1 p x')    = coreCheckApp tvctx ctx (primTy1 p) x'
+    go (Prim2 p x' y') = coreCheckApp tvctx ctx (primTy2 p) (Fix $ Tuple [x', y'])
+    go (Tuple ts)      = Fix . TTuple <$> mapM (coreCheck tvctx ctx) ts
     go (Inject _dc)     = error "coreCheck - Inject NYI"
     go (Case _e _alts)   = error "coreCheck - Inject Case"
     go (Let _b _rhs _bdy) = error "coreCheck - Inject Let"
     go (LetRec _bs _bdy) = error "coreCheck - Inject LetRec"
 
 
-coreCheckApp :: KindEnv -> TypeEnv -> Type -> Expr -> Except T.Text Type
-coreCheckApp kenv tenv (Fix (TFunTy tx tres)) x' = do
-                                       tx' <- coreCheck kenv tenv x'
+coreCheckApp :: TyVarContext -> VarContext -> Type -> Expr -> Except T.Text Type
+coreCheckApp tvctx ctx (Fix (TFunTy tx tres)) x' = do
+                                       tx' <- coreCheck tvctx ctx x'
                                        unless (tx == tx') $
                                               throwError $ "Attempt to apply fn expecting " <> tshow tx
                                                              <> " to " <> tshow tx'
@@ -60,7 +60,7 @@ coreCheckApp _    _    tf _ = throwError ("Attempt to apply a non-function :: " 
 
 
 -- TODO
-typeKind :: KindEnv -> Type -> Except T.Text Kind
+typeKind :: TyVarContext -> Type -> Except T.Text Kind
 typeKind _ _ = return ()
 
 -- | TyVar substitution within a Type. eg

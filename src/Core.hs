@@ -1,12 +1,11 @@
 {-# LANGUAGE FlexibleContexts, DeriveFunctor, DeriveFoldable, DeriveTraversable, PatternSynonyms #-}
 module Core(
-  TypeEnv, -- ^ Kept abstract
-  lookupTypeEnv,
-  extendTypeEnv,
-  emptyTypeEnv,
+  VarContext, -- ^ Kept abstract
+  lookupVarContext,
+  extendVarContext,
+  emptyVarContext,
 
-  primKindEnv,
-  primTypeEnv,
+  primVarContext,
 
   Expr,
   ExprF(..),
@@ -42,39 +41,36 @@ import qualified Data.Text   as T
 -- c.f. 'TyVar' in Type.hs
 newtype Var = V { varId :: Int } deriving (Eq, Ord, Show)
 
-newtype TypeEnv = TypeEnv { unTypeEnv :: IM.IntMap Type } deriving (Eq, Show) -- Var   -> Type
+newtype VarContext = VarContext { unVarContext :: IM.IntMap Type } deriving (Eq, Show) -- Var   -> Type
 
-emptyTypeEnv :: TypeEnv
-emptyTypeEnv = TypeEnv IM.empty
+emptyVarContext :: VarContext
+emptyVarContext = VarContext IM.empty
 
-lookupTypeEnv :: TypeEnv -> Var -> Maybe Type
-lookupTypeEnv te v = IM.lookup (varId v) (unTypeEnv te)
+lookupVarContext :: VarContext -> Var -> Maybe Type
+lookupVarContext te v = IM.lookup (varId v) (unVarContext te)
 
-extendTypeEnv :: TypeEnv -> Var -> Type -> TypeEnv
-extendTypeEnv te v t = TypeEnv $ IM.insert (varId v) t $ unTypeEnv te
+extendVarContext :: VarContext -> Var -> Type -> VarContext
+extendVarContext te v t = VarContext $ IM.insert (varId v) t $ unVarContext te
 
-unionTypeEnv :: TypeEnv -> TypeEnv -> TypeEnv
-unionTypeEnv (TypeEnv t1) (TypeEnv t2) = TypeEnv (IM.union t1 t2)
+unionVarContext :: VarContext -> VarContext -> VarContext
+unionVarContext (VarContext t1) (VarContext t2) = VarContext (IM.union t1 t2)
 
-primTypeEnv :: TypeEnv
-primTypeEnv = -- foldr (\(var,t) te -> extendTypeEnv te var t) emptyTypeEnv [minBound .. maxBound]
+primVarContext :: VarContext
+primVarContext = -- foldr (\(var,t) te -> extendVarContext te var t) emptyVarContext [minBound .. maxBound]
               -- ++
-              -- foldr (\(var,t) te -> extendTypeEnv te var t) emptyTypeEnv [minBound .. maxBound]
+              -- foldr (\(var,t) te -> extendVarContext te var t) emptyVarContext [minBound .. maxBound]
               -- FIXME !!!!!!!!!!!
               -- FIXME: Starting at 1000 is hideous hack. Work out how to assign these sensibly...
               -- FIXME !!!!!!!!!!!
-              foldr (\np te -> uncurry (extendTypeEnv te) $ p1 np) emptyTypeEnv (zip [1000..] [minBound .. maxBound])
-              `unionTypeEnv`
-              foldr (\np te -> uncurry (extendTypeEnv te) $ p2 np) emptyTypeEnv (zip [2000..] [minBound .. maxBound])
+              foldr (\np te -> uncurry (extendVarContext te) $ p1 np) emptyVarContext (zip [1000..] [minBound .. maxBound])
+              `unionVarContext`
+              foldr (\np te -> uncurry (extendVarContext te) $ p2 np) emptyVarContext (zip [2000..] [minBound .. maxBound])
     where
       p1 :: (Int,Prim1) -> (Var, Type)
       p1 (n, p) = (V n, primTy1 p)
 
       p2 :: (Int,Prim2) -> (Var, Type)
       p2 (n, p) = (V n, primTy2 p)
-
-primKindEnv :: KindEnv
-primKindEnv = KindEnv $ IM.map (const kindStar) $ unTypeEnv primTypeEnv
 
 data ExprF f =
    Var      Var                -- (STLC)

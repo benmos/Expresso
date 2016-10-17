@@ -1,10 +1,9 @@
 {-# LANGUAGE DeriveFunctor, DeriveFoldable, DeriveTraversable, PatternSynonyms #-}
 module Type(
-  -- KindEnv, -- ^ Kept abstract
-  KindEnv(..), -- Exposing for now so we can build 'primKindEnv'
-  lookupKindEnv,
-  extendKindEnv,
-  emptyKindEnv,
+  TyVarContext, -- ^ Kept abstract
+  lookupTyVarContext,
+  extendTyVarContext,
+  emptyTyVarContext,
 
   kindStar,
 
@@ -33,19 +32,28 @@ import Utils
 import qualified Data.IntMap as IM
 import qualified Data.Text   as T
 
+-- Key      Value          Name
+--------------------------------------
+-- Var      Value          Env
+-- TyVar    Type           TypeEnv
+--------------------------------------
+-- Var      Type           Context (Gamma)     -- 'VarContext'
+-- TyVar    Kind           Context (Gamma)     -- 'TyVarContext'
+--------------------------------------
+
 -- c.f. 'Var' in Core.hs
 newtype TyVar = TV { tvarId :: Int } deriving (Eq, Ord, Show)
 
-newtype KindEnv = KindEnv { unKindEnv :: IM.IntMap Kind } deriving (Eq, Show) -- TyVar -> Kind
+newtype TyVarContext = TyVarContext { unTyVarContext :: IM.IntMap Kind } deriving (Eq, Show) -- TyVar -> Kind
 
-lookupKindEnv :: KindEnv -> TyVar -> Maybe Kind
-lookupKindEnv ke tv = IM.lookup (tvarId tv) (unKindEnv ke)
+lookupTyVarContext :: TyVarContext -> TyVar -> Maybe Kind
+lookupTyVarContext ke tv = IM.lookup (tvarId tv) (unTyVarContext ke)
 
-extendKindEnv :: KindEnv -> TyVar -> Kind -> KindEnv
-extendKindEnv ke v k = KindEnv $ IM.insert (tvarId v) k $ unKindEnv ke
+extendTyVarContext :: TyVarContext -> TyVar -> Kind -> TyVarContext
+extendTyVarContext ke v k = TyVarContext $ IM.insert (tvarId v) k $ unTyVarContext ke
 
-emptyKindEnv :: KindEnv
-emptyKindEnv = KindEnv IM.empty
+emptyTyVarContext :: TyVarContext
+emptyTyVarContext = TyVarContext IM.empty
 
 type Kind = () -- NYI
 type Type = Fix TypeF
