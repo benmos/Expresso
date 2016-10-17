@@ -47,11 +47,12 @@ extendTypeEnv :: TypeEnv -> Var -> Type -> TypeEnv
 extendTypeEnv te v t = TypeEnv $ IM.insert (varId v) t $ unTypeEnv te
 
 data ExprF f =
-   Var      Var
- | App                  f f
- | Abs      Type Bind   f
- | TyApp                f Type
- | TyAbs    Kind TyBind f
+   Var      Var                -- (STLC)
+ | App                  f f    -- (STLC)
+ | Abs      Type Bind   f      -- (STLC)
+
+ | TyApp                f Type -- (System-F)
+ | TyAbs    Kind TyBind f      -- (System-F)
 
  | Let      Bind f   f
  | LetRec [(Bind,f)] f -- (Mutually-)Recursive bindings

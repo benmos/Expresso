@@ -43,23 +43,28 @@ extendKindEnv ke v k = KindEnv $ IM.insert (tvarId v) k $ unKindEnv ke
 type Kind = () -- NYI
 type Type = Fix TypeF
 
+-- Greg Morrisett would probably call this 'ConstructorF', because not all constructors are types (ie of Kind *)
+-- TODO: Rename ConstructorF
 data TypeF f =
-   TVar    TyVar
- | TApp    f f
- | TFunTy  f f     -- Arrow type -- GHC removed this fairly recently IIUC
-                   -- IIUC GHC's "FunTy" used to be used for /saturated/
-                   -- applications of the (->) TyCon (which would then be
-                   -- implicit) ... which presumably means that 'TApp'
-                   -- would sometimes be used for non-saturated
-                   -- applications of (->). [http://www.cis.upenn.edu/~eir/files/ghc/ghc.pdf]
-                   -- See also ["An overabundance of equality" paper (Fig.2)] for comment
-                   -- on 'FunTy' / (->) type
-                   -- See (slightly) old GHC:
-                   -- [https://github.com/ghc/ghc/blob/6e56ac58a6905197412d58e32792a04a63b94d7e/compiler/types/TypeRep.hs]
-                   -- Before: [https://github.com/ghc/ghc/tree/6e56ac58a6905197412d58e32792a04a63b94d7e/compiler/types]
-                   -- After:  [https://github.com/ghc/ghc/tree/6746549772c5cc0ac66c0fce562f297f4d4b80a2/compiler/types]
- | TForAll Kind TyVar f -- Polymorphic types (System F)
---  | TAbs Kind TyVar f -- Type-lambda (System Fw)
+   TFunTy  f f          -- (STLC)
+                        -- Arrow type -- GHC removed this fairly recently IIUC
+                        -- IIUC GHC's "FunTy" used to be used for /saturated/
+                        -- applications of the (->) TyCon (which would then be
+                        -- implicit) ... which presumably means that 'TApp'
+                        -- would sometimes be used for non-saturated
+                        -- applications of (->). [http://www.cis.upenn.edu/~eir/files/ghc/ghc.pdf]
+                        -- See also ["An overabundance of equality" paper (Fig.2)] for comment
+                        -- on 'FunTy' / (->) type
+                        -- See (slightly) old GHC:
+                        -- [https://github.com/ghc/ghc/blob/6e56ac58a6905197412d58e32792a04a63b94d7e/compiler/types/TypeRep.hs]
+                        -- Before: [https://github.com/ghc/ghc/tree/6e56ac58a6905197412d58e32792a04a63b94d7e/compiler/types]
+                        -- After:  [https://github.com/ghc/ghc/tree/6746549772c5cc0ac66c0fce562f297f4d4b80a2/compiler/types]
+
+ | TVar    TyVar        -- (System-F)
+ | TForAll Kind TyVar f -- (System-F) Polymorphic types
+
+ | TApp    f f          -- (System-Fw)
+--  | TAbs Kind TyVar f -- (System Fw) Type-lambda
 
  | TCon TyCon
  | TTuple [f]
