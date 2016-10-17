@@ -23,7 +23,9 @@ coreCheck tvctx ctx = go . unFix
     go (App f x') = do
                    tf  <- go (unFix f)
                    coreCheckApp tvctx ctx tf x'
-    go (Abs tx x b) = coreCheck tvctx (extendVarContext ctx x tx) b
+    go (Abs tx x b) = do
+      tb <- coreCheck tvctx (extendVarContext ctx x tx) b
+      return $ Fix $ TFunTy tx tb
     go (TyApp f t) = do -- (System-F) Type Application
                    tf <- go       (unFix f)
                    k' <- typeKind tvctx t
@@ -32,9 +34,15 @@ coreCheck tvctx ctx = go . unFix
                                        unless (k == k') $
                                               throwError $ "Attempt to type-apply a " <> tshow k
                                                              <> " to " <> tshow k'
+                                       -- TODO: Should we extend a Type *Env* here rather than subst?
+                                       --       ... that would mean we'd carry around a Type *Env* in
+                                       --       the typechecker as well as the ctxs, but may well make
+                                       --       sense.
                                        return $ tsubst tv t tres
                      _              -> throwError ("Attempt to type-apply a non-typeabs: " <> tshow f <> " :: " <> tshow tf)
-    go (TyAbs k tb b)  = coreCheck (extendTyVarContext tvctx tb k) ctx b
+    go (TyAbs k tv b)  = do
+      tb <- coreCheck (extendTyVarContext tvctx tv k) ctx b
+      return $ Fix $ TForAll k tv tb
 
 
 
