@@ -5,9 +5,7 @@ module Type(
   extendTyVarContext,
   emptyTyVarContext,
 
-  kindStar,
-
-  Kind,
+  Kind(..),
   Type,
   TypeF(..),
   TyCon(..),
@@ -55,11 +53,8 @@ extendTyVarContext ke v k = TyVarContext $ IM.insert (tvarId v) k $ unTyVarConte
 emptyTyVarContext :: TyVarContext
 emptyTyVarContext = TyVarContext IM.empty
 
-type Kind = () -- NYI
+data Kind = KindStar | KindArr Kind Kind deriving (Eq, Ord, Show)
 type Type = Fix TypeF
-
-kindStar :: Kind
-kindStar = () -- TODO
 
 -- Greg Morrisett would probably call this 'ConstructorF', because not all constructors are types (ie of Kind *)
 -- TODO: Rename ConstructorF

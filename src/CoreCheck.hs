@@ -39,14 +39,14 @@ coreCheck tvctx ctx = go . unFix
 
 
 
-    go (Lit l)         = return $ typeLit l
-    go (Prim1 p x')    = coreCheckApp tvctx ctx (primTy1 p) x'
-    go (Prim2 p x' y') = coreCheckApp tvctx ctx (primTy2 p) (Fix $ Tuple [x', y'])
-    go (Tuple ts)      = Fix . TTuple <$> mapM (coreCheck tvctx ctx) ts
-    go (Inject _dc)     = error "coreCheck - Inject NYI"
-    go (Case _e _alts)   = error "coreCheck - Inject Case"
-    go (Let _b _rhs _bdy) = error "coreCheck - Inject Let"
-    go (LetRec _bs _bdy) = error "coreCheck - Inject LetRec"
+    go (Lit l)            = return $ typeLit l
+    go (Prim1 p x')       = coreCheckApp tvctx ctx (primTy1 p) x'
+    go (Prim2 p x' y')    = coreCheckApp tvctx ctx (primTy2 p) (Fix $ Tuple [x', y'])
+    go (Tuple ts)         = Fix . TTuple <$> mapM (coreCheck tvctx ctx) ts
+    go (Inject _dc)       = error "coreCheck - Inject NYI"
+    go (Case _e _alts)    = error "coreCheck - Case NYI"
+    go (Let _b _rhs _bdy) = error "coreCheck - Let NYI"
+    go (LetRec _bs _bdy)  = error "coreCheck - LetRec NYI"
 
 
 coreCheckApp :: TyVarContext -> VarContext -> Type -> Expr -> Except T.Text Type
@@ -61,7 +61,7 @@ coreCheckApp _    _    tf _ = throwError ("Attempt to apply a non-function :: " 
 
 -- TODO
 typeKind :: TyVarContext -> Type -> Except T.Text Kind
-typeKind _ _ = return ()
+typeKind _ _ = return KindStar
 
 -- | TyVar substitution within a Type. eg
 --
