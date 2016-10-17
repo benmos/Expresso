@@ -71,7 +71,7 @@ data TypeF f =
  | TLet      TyVar f   f
  | TLetRec [(TyVar,f)] f
 
- deriving (Eq, Ord, Show, Functor, Foldable, Traversable)
+ deriving (Eq, Ord, Show, Functor, Foldable, Traversable) -- FIXME - Remove 'Eq' instance. We need alpha equiv!!!
 
 type Name = T.Text
 

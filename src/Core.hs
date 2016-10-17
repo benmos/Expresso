@@ -71,7 +71,7 @@ data ExprF f =
                       -- (ie as 'Var Id' but tagged with appropriate 'IdDetails'...)
                       -- we prefer to represent them explicitly .... Q. Is that sensible??
 
- deriving (Eq, Ord, Show, Functor, Foldable, Traversable)
+ deriving (Eq, Ord, Show, Functor, Foldable, Traversable) -- FIXME - Remove 'Eq' instance. We need alpha equiv!!!
 
 type Expr   = Fix ExprF
 type Bind   = Var
